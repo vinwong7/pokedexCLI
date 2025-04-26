@@ -24,7 +24,7 @@ func replStart() {
 
 		command, ok := getCommands()[first_word]
 		if ok {
-			command.callback()
+			command.callback(&location_config)
 		} else {
 			fmt.Println("Unknown command")
 		}
@@ -35,7 +35,22 @@ func replStart() {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*config) error
+}
+
+type config struct {
+	Next     string
+	Previous *string
+}
+
+type mapLocation struct {
+	Count    int     `json:"count"`
+	Next     string  `json:"next"`
+	Previous *string `json:"previous"`
+	Results  []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"results"`
 }
 
 func getCommands() map[string]cliCommand {
@@ -49,6 +64,16 @@ func getCommands() map[string]cliCommand {
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Check the next 20 locations",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Check the last 20 locations",
+			callback:    commandMapb,
 		},
 	}
 }
