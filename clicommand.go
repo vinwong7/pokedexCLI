@@ -1,17 +1,10 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 )
-
-var location_config = config{
-	Next:     "https://pokeapi.co/api/v2/location-area/",
-	Previous: nil,
-}
 
 func commandExit(c *config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
@@ -32,26 +25,18 @@ func commandHelp(c *config) error {
 }
 
 func commandMap(c *config) error {
-	res, err := http.Get(c.Next)
+
+	//Runs the MapLocations method to generate the map location struct
+	location, err := c.pokeapiClient.MapLocations(c.nextURL)
 	if err != nil {
-		return fmt.Errorf("error making request")
+		return err
 	}
 
-	defer res.Body.Close()
+	//Updates the map location struct with the newest URLs so rerunning the function runs the next page
+	(*c).previousURL = location.Previous
+	(*c).nextURL = location.Next
 
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response")
-	}
-
-	location := mapLocation{}
-	if err = json.Unmarshal(data, &location); err != nil {
-		return fmt.Errorf("unmarshal error")
-	}
-
-	(*c).Previous = location.Previous
-	(*c).Next = location.Next
-
+	//Loops through the map location struct results, which are the map locations
 	for _, v := range location.Results {
 		fmt.Printf("%v\n", v.Name)
 	}
@@ -60,30 +45,20 @@ func commandMap(c *config) error {
 
 func commandMapb(c *config) error {
 
-	if c.Previous == nil {
+	//If the previous URL is nil, then we have not run past page 2, so just print statement
+	if c.previousURL == nil {
 		fmt.Println("You're on the first page")
 		return nil
 	}
 
-	res, err := http.Get(*c.Previous)
+	//Same as above, but using the previous URL
+	location, err := c.pokeapiClient.MapLocations(c.previousURL)
 	if err != nil {
-		return fmt.Errorf("error making request")
+		return err
 	}
 
-	defer res.Body.Close()
-
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response")
-	}
-
-	location := mapLocation{}
-	if err = json.Unmarshal(data, &location); err != nil {
-		return fmt.Errorf("unmarshal error")
-	}
-
-	(*c).Previous = location.Previous
-	(*c).Next = location.Next
+	(*c).previousURL = location.Previous
+	(*c).nextURL = location.Next
 
 	for _, v := range location.Results {
 		fmt.Printf("%v\n", v.Name)
