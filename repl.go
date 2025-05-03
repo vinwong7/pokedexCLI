@@ -23,10 +23,14 @@ func replStart(cfg *config) {
 		input_text := scanner.Text()
 		clean_input := cleanInput(input_text)
 		first_word := clean_input[0]
+		var second_word string = ""
+		if len(clean_input) > 1 {
+			second_word = clean_input[1]
+		}
 
 		command, ok := getCommands()[first_word]
 		if ok {
-			command.callback(cfg)
+			command.callback(cfg, second_word)
 		} else {
 			fmt.Println("Unknown command")
 		}
@@ -37,7 +41,7 @@ func replStart(cfg *config) {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, string) error
 }
 
 type config struct {
@@ -67,6 +71,26 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Show the previous page of locations",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Show a list of Pokemons found in the area",
+			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Try to catch a Pokemon",
+			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Check the stats of a captured Pokemon",
+			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Lists the names of all captured Pokemons",
+			callback:    commandPokedex,
 		},
 	}
 }
