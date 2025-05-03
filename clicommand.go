@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-
-	"github.com/vinwong7/pokedexCLI/internal/pokeapi"
 )
 
 func commandExit(c *config, s string) error {
@@ -87,8 +85,6 @@ func commandExplore(c *config, s string) error {
 	return nil
 }
 
-var caught_pokemon map[string]pokeapi.Pokestat = make(map[string]pokeapi.Pokestat)
-
 func commandCatch(c *config, s string) error {
 
 	stat, err := c.pokeapiClient.PokemonStats(s)
@@ -100,7 +96,7 @@ func commandCatch(c *config, s string) error {
 	random_number := rand.Intn(1000)
 	if base_chance >= random_number {
 		fmt.Printf("%v was caught!\n", s)
-		caught_pokemon[s] = stat
+		c.caught_pokemon[s] = stat
 
 	} else {
 		fmt.Printf("%v escaped!\n", s)
@@ -111,7 +107,7 @@ func commandCatch(c *config, s string) error {
 
 func commandInspect(c *config, s string) error {
 
-	stat, ok := caught_pokemon[s]
+	stat, ok := c.caught_pokemon[s]
 	if !ok {
 		println("you have not caught that pokemon")
 	} else {
@@ -134,7 +130,7 @@ func commandInspect(c *config, s string) error {
 func commandPokedex(c *config, s string) error {
 
 	fmt.Println("Your PokeDex:")
-	for k := range caught_pokemon {
+	for k := range c.caught_pokemon {
 		fmt.Printf("= %v\n", k)
 	}
 

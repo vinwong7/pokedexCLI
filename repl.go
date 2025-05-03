@@ -45,9 +45,10 @@ type cliCommand struct {
 }
 
 type config struct {
-	pokeapiClient pokeapi.Client
-	nextURL       *string
-	previousURL   *string
+	pokeapiClient  pokeapi.Client
+	nextURL        *string
+	previousURL    *string
+	caught_pokemon map[string]pokeapi.Pokestat
 }
 
 func getCommands() map[string]cliCommand {
